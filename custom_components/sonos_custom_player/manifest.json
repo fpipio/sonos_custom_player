@@ -1,9 +1,9 @@
 {
-    "domain": "sonos_helper",
-    "name": "Sonos Helper",
+    "domain": "sonos_custom_player",
+    "name": "Sonos Custom Player",
     "documentation": "https://github.com/fpipio/sonos_custom_player",
-    "dependencies": [],
-    "codeowners": [],
+    "dependencies": ["media_player"],
+    "codeowners": ["@fpipio"],
     "requirements": ["soco==0.29.1"],
     "version": "0.1.0"
   }
