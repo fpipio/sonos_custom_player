@@ -1,7 +1,7 @@
 {
     "domain": "sonos_helper",
     "name": "Sonos Helper",
-    "documentation": "https://github.com/your_username/your_repo",
+    "documentation": "https://github.com/fpipio/sonos_custom_player",
     "dependencies": [],
     "codeowners": [],
     "requirements": ["soco==0.29.1"],
