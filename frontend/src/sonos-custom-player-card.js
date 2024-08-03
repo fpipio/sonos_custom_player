@@ -5,6 +5,7 @@ class SonosCustomPlayerCard extends HTMLElement {
     _hass;
     _elements = {};
     progressInterval = null;
+    _previousVolume = null;
 
     constructor() {
         console.log("constructor()");
@@ -64,11 +65,12 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     onVolumeChanged(event) {
-        const volume = event.target.value;
+        const volume = event.target.value / 100;
         this._hass.callService("media_player", "volume_set", {
             entity_id: this.getEntityID(),
-            volume_level: volume / 100
+            volume_level: volume
         });
+        this._previousVolume = volume;
     }
 
     syncPositionWithServer() {
@@ -227,12 +229,30 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     onVolumeIconClicked() {
-        const isMuted = this.getAttributes().is_volume_muted;
-        const newMuteState = !isMuted;
-        this._hass.callService("media_player", "volume_mute", {
-            entity_id: this.getEntityID(),
-            is_volume_muted: newMuteState
-        });
+        const state = this.getState();
+        const isMuted = state.attributes.is_volume_muted;
+        const currentVolume = state.attributes.volume_level;
+    
+        if (isMuted) {
+            // Se è già in muto, ripristina il volume precedente
+            const volumeToSet = this._previousVolume !== null ? this._previousVolume : 0.5; // Default a 0.5 se non c'è un volume precedente
+            this._hass.callService("media_player", "volume_set", {
+                entity_id: this.getEntityID(),
+                volume_level: volumeToSet
+            });
+            this._hass.callService("media_player", "volume_mute", {
+                entity_id: this.getEntityID(),
+                is_volume_muted: false
+            });
+            this._previousVolume = null;
+        } else {
+            // Se non è in muto, memorizza il volume attuale e metti in muto
+            this._previousVolume = currentVolume;
+            this._hass.callService("media_player", "volume_mute", {
+                entity_id: this.getEntityID(),
+                is_volume_muted: true
+            });
+        }
     }
 
     onQueueClicked() {
@@ -613,6 +633,16 @@ doAttach() {
             this._elements.mediaTitle.textContent = state.attributes.media_title || 'Sconosciuto';
             this._elements.mediaArtist.textContent = state.attributes.media_artist || 'Sconosciuto';
             this._elements.mediaAlbum.textContent = state.attributes.media_album_name || 'Sconosciuto';
+
+            const isMuted = state.attributes.is_volume_muted;
+            const volumeIcon = isMuted ? "mdi:volume-off" : "mdi:volume-high";
+            this._elements.volumeIcon.setAttribute("icon", volumeIcon);
+            
+            if (!isMuted) {
+                this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
+            }
+
+
     
             const mediaContentId = state.attributes.media_content_id;
             if (mediaContentId && typeof mediaContentId === 'string') {
