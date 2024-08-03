@@ -11,7 +11,7 @@
 
 4. Aggiungi la risorsa Lovelace. In Lovelace, vai su Configurazione -> Risorse e aggiungi:  "/local/sonos-custom-player-card.js?vxxx" dove xxx è un progressivo
 
-6. Riavvia Home Assistant.
+5. Riavvia Home Assistant.
 
 ## Utilizzo
 

@@ -126,32 +126,32 @@ class SonosCustomPlayerCard extends HTMLElement {
     onProgressChanged(event) {
         const progress = parseFloat(event.target.value) / 100;
         console.log("Raw progress:", progress);
-
+    
         this.updateSeekBarProgress(progress);
-
+    
         const state = this.getState();
         console.log("Current state:", state);
-
+    
         if (state && state.attributes.media_duration) {
             const mediaDuration = parseFloat(state.attributes.media_duration);
             console.log("Media duration:", mediaDuration);
-
+    
             if (isNaN(mediaDuration) || !isFinite(mediaDuration)) {
                 console.error("Invalid media duration");
                 return;
             }
-
+    
             const seekPosition = progress * mediaDuration;
             console.log("Calculated seek position:", seekPosition);
-
+    
             const roundedSeekPosition = Math.round(seekPosition * 100) / 100;
             console.log("Rounded seek position:", roundedSeekPosition);
-
+    
             clearTimeout(this.seekTimeout);
             this.seekTimeout = setTimeout(() => {
                 this._elements.progressSlider.classList.add('seeking');
                 this._elements.currentTime.textContent = this.formatTime(roundedSeekPosition);
-
+    
                 console.log("Calling media_seek with position:", roundedSeekPosition);
                 this._hass.callService("media_player", "media_seek", {
                     entity_id: this.getEntityID(),
@@ -405,15 +405,6 @@ class SonosCustomPlayerCard extends HTMLElement {
                     </div>
                     <ha-icon class="media-source-icon"></ha-icon>
                 </div>
-                <div class="progress-control">
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill"></div>
-                    </div>
-                    <input type="range" id="progress" name="progress" min="0" max="100" value="0">
-                    <div class="time-display">
-                        <span class="current-time">0:00</span> <span class="duration">0:00</span>
-                    </div>
-                </div>
                 <div class="volume-control">
                     <ha-icon id="volume-icon" class="volume-icon" icon="mdi:volume-high"></ha-icon>
                     <input type="range" id="volume" name="volume" min="0" max="100">
@@ -428,6 +419,20 @@ class SonosCustomPlayerCard extends HTMLElement {
                         <ha-icon id="repeat" icon="mdi:repeat-off"></ha-icon>
                         <ha-icon id="shuffle" icon="mdi:shuffle-disabled"></ha-icon>
                         <ha-icon id="queue" icon="mdi:playlist-music"></ha-icon>
+                    </div>
+                </div>
+                <div class="progress-control">
+                    <div class="time-display">
+                        <span class="current-time">0:00</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill"></div>
+                        </div>
+                        <input type="range" id="progress" name="progress" min="0" max="100" value="0">
+                    </div>
+                    <div class="time-display">
+                        <span class="duration">0:00</span>
                     </div>
                 </div>
             </div>
@@ -597,7 +602,7 @@ doAttach() {
         this._elements.error.classList.add("hidden");
         this._elements.card.classList.remove("unavailable");
         this._elements.card.querySelector('.media-info').style.display = 'flex';
-        this._elements.card.querySelector('.progress-control').style.display = 'block';
+        this._elements.card.querySelector('.progress-control').style.display = 'flex';
         this._elements.card.querySelector('.volume-control').style.display = 'flex';
         this._elements.card.querySelector('.media-controls').style.display = 'flex';
     
