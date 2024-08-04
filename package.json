@@ -1,20 +1,20 @@
 {
-    "name": "sonos-custom-player-card",
-    "version": "1.0.0",
-    "description": "",
-    "type": "module",
-    "main": "frontend/dist/sonos-custom-player-card.js.js",
-    "scripts": {
-        "build": "rollup -c"
-    },
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "@rollup/plugin-commonjs": "^25.0.7",
-        "@rollup/plugin-node-resolve": "^15.2.3",
-        "rollup": "^4.17.2"
-    },
-    "dependencies": {
-        "node-ssdp": "^1.0.0"
-    }
+  "name": "sonos-custom-player-card",
+  "version": "1.0.0",
+  "description": "1. Copia l'intera cartella `custom_components/sonos_custom_player` nella cartella `custom_components` della tua installazione Home Assistant.",
+  "type": "module",
+  "main": "frontend/dist/sonos-custom-player-card.js.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "rollup": "^4.17.2"
+  },
+  "dependencies": {
+    "node-ssdp": "^1.0.0"
+  }
 }
