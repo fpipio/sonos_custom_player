@@ -1,5 +1,4 @@
 export const styles = `
-/* Generale */
 .error {
     color: red;
     padding: 10px;
@@ -55,71 +54,34 @@ export const styles = `
     align-self: flex-start;
 }
 
-.progress-control {
+/* Controls Row */
+.controls-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin: 20px 20px 5px 20px;
+    margin-bottom: 15px;
 }
 
-.progress-bar-container {
-    flex-grow: 1;
-    margin: 0 10px;
-    position: relative;
+/* Play/Pause Control */
+.play-pause-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 20px;
 }
 
-.progress-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--secondary-background-color, #d3d3d3);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background-color: var(--primary-color, #4CAF50);
-    width: 0%;
-    transition: width 0.1s linear;
-}
-
-.progress-control input[type="range"] {
-    -webkit-appearance: none;    
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: transparent;
-    margin: 0;
-    padding: 0;
-    height: 4px;
+.play-pause-control ha-icon {
+    font-size: 48px;
     cursor: pointer;
-    opacity: 0;
-    z-index: 2;
 }
 
-#progress.seeking {
-    opacity: 0.7;
-}
-
-
-.time-display {
-    font-size: 0.8em;
-    color: var(--secondary-text-color);
-    min-width: 40px; /* Assicura che ci sia spazio sufficiente per il testo */
-}
-
-.time-display:first-child {
-    text-align: right;
-}
-
-.time-display:last-child {
-    text-align: left;
-}
-
+/* Volume Control */
 .volume-control {
     display: flex;
     align-items: center;
-    height: 36px; /* Altezza fissa per il contenitore */
+    width: 75%;
+    height: 36px;
+    margin-right: 20px;
 }
 
 .volume-icon {
@@ -130,9 +92,9 @@ export const styles = `
 
 .volume-control input[type="range"] {
     -webkit-appearance: none;
-    width: calc(100% - 34px); /* Sottrai la larghezza dell'icona più il margine */
+    width: calc(100% - 34px);
     height: 4px;
-    background: #ddd;
+    background: var(--secondary-background-color, #ddd);
     outline: none;
     opacity: 0.7;
     transition: opacity .2s, background .2s;
@@ -162,35 +124,94 @@ export const styles = `
     border-radius: 50%;
 }
 
-/* Media Controls */
-.media-controls {
-    margin-top: 20px;
+/* Progress Control */
+.progress-control {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.progress-bar-container {
+    flex-grow: 1;
+    margin: 0 10px;
+    position: relative;
+    height: 4px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background: var(--secondary-background-color, #d3d3d3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-color, #4CAF50);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.progress-control input[type="range"] {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    height: 8px;
+    cursor: pointer;
+    opacity: 0;
+    z-index: 2;
+}
+
+#progress.seeking {
+    opacity: 0.7;
+}
+
+.current-time, .duration {
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+    min-width: 40px;
+}
+
+.bottom-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
 }
 
-.media-controls ha-icon {
-    cursor: pointer;
-    font-size: 28px;
-    color: #333;
-}
-
-.media-controls .playback-controls {
+/* Track Controls */
+.track-controls {
     display: flex;
-    justify-content: center;
-    flex-grow: 1;
-    gap: 20px;
+    align-items: center;
+    margin-left: 20px;
 }
 
-.media-controls .extra-controls {
-    display: flex;
-    gap: 15px;
-}
-
-.media-controls .extra-controls ha-icon {
+.track-controls ha-icon {
     font-size: 22px;
-    color: #666;
+    cursor: pointer;
+    margin-right: 20px;
+    opacity: 50%;
+}
+
+/* Extra Controls */
+.extra-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.extra-controls ha-icon {
+    font-size: 22px;
+    cursor: pointer;
+    margin-left: 15px;
+    opacity: 50%;
 }
 
 /* Loading State */
@@ -198,7 +219,6 @@ export const styles = `
     opacity: 0.5;
     pointer-events: none;
 }
-
 
 /* Queue Popup */
 .queue-overlay {
@@ -235,6 +255,8 @@ export const styles = `
 .queue-content h3 {
     margin-top: 0;
     margin-bottom: 15px;
+    font-size: 1.2em;
+    color: var(--primary-text-color);
 }
 
 #queue-list {
@@ -311,13 +333,6 @@ export const styles = `
 .queue-overlay.hidden,
 .queue-popup.hidden {
     display: none;
-}
-
-.queue-content h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-    color: var(--primary-text-color);
 }
 
 /* Responsive Design */

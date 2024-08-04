@@ -1,7 +1,6 @@
 'use strict';
 
 const styles = `
-/* Generale */
 .error {
     color: red;
     padding: 10px;
@@ -57,71 +56,34 @@ const styles = `
     align-self: flex-start;
 }
 
-.progress-control {
+/* Controls Row */
+.controls-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin: 20px 20px 5px 20px;
+    margin-bottom: 15px;
 }
 
-.progress-bar-container {
-    flex-grow: 1;
-    margin: 0 10px;
-    position: relative;
+/* Play/Pause Control */
+.play-pause-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 20px;
 }
 
-.progress-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--secondary-background-color, #d3d3d3);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background-color: var(--primary-color, #4CAF50);
-    width: 0%;
-    transition: width 0.1s linear;
-}
-
-.progress-control input[type="range"] {
-    -webkit-appearance: none;    
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: transparent;
-    margin: 0;
-    padding: 0;
-    height: 4px;
+.play-pause-control ha-icon {
+    font-size: 48px;
     cursor: pointer;
-    opacity: 0;
-    z-index: 2;
 }
 
-#progress.seeking {
-    opacity: 0.7;
-}
-
-
-.time-display {
-    font-size: 0.8em;
-    color: var(--secondary-text-color);
-    min-width: 40px; /* Assicura che ci sia spazio sufficiente per il testo */
-}
-
-.time-display:first-child {
-    text-align: right;
-}
-
-.time-display:last-child {
-    text-align: left;
-}
-
+/* Volume Control */
 .volume-control {
     display: flex;
     align-items: center;
-    height: 36px; /* Altezza fissa per il contenitore */
+    width: 75%;
+    height: 36px;
+    margin-right: 20px;
 }
 
 .volume-icon {
@@ -132,9 +94,9 @@ const styles = `
 
 .volume-control input[type="range"] {
     -webkit-appearance: none;
-    width: calc(100% - 34px); /* Sottrai la larghezza dell'icona più il margine */
+    width: calc(100% - 34px);
     height: 4px;
-    background: #ddd;
+    background: var(--secondary-background-color, #ddd);
     outline: none;
     opacity: 0.7;
     transition: opacity .2s, background .2s;
@@ -164,35 +126,94 @@ const styles = `
     border-radius: 50%;
 }
 
-/* Media Controls */
-.media-controls {
-    margin-top: 20px;
+/* Progress Control */
+.progress-control {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.progress-bar-container {
+    flex-grow: 1;
+    margin: 0 10px;
+    position: relative;
+    height: 4px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background: var(--secondary-background-color, #d3d3d3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-color, #4CAF50);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.progress-control input[type="range"] {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    height: 8px;
+    cursor: pointer;
+    opacity: 0;
+    z-index: 2;
+}
+
+#progress.seeking {
+    opacity: 0.7;
+}
+
+.current-time, .duration {
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+    min-width: 40px;
+}
+
+.bottom-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
 }
 
-.media-controls ha-icon {
-    cursor: pointer;
-    font-size: 28px;
-    color: #333;
-}
-
-.media-controls .playback-controls {
+/* Track Controls */
+.track-controls {
     display: flex;
-    justify-content: center;
-    flex-grow: 1;
-    gap: 20px;
+    align-items: center;
+    margin-left: 20px;
 }
 
-.media-controls .extra-controls {
-    display: flex;
-    gap: 15px;
-}
-
-.media-controls .extra-controls ha-icon {
+.track-controls ha-icon {
     font-size: 22px;
-    color: #666;
+    cursor: pointer;
+    margin-right: 20px;
+    opacity: 50%;
+}
+
+/* Extra Controls */
+.extra-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.extra-controls ha-icon {
+    font-size: 22px;
+    cursor: pointer;
+    margin-left: 15px;
+    opacity: 50%;
 }
 
 /* Loading State */
@@ -200,7 +221,6 @@ const styles = `
     opacity: 0.5;
     pointer-events: none;
 }
-
 
 /* Queue Popup */
 .queue-overlay {
@@ -237,6 +257,8 @@ const styles = `
 .queue-content h3 {
     margin-top: 0;
     margin-bottom: 15px;
+    font-size: 1.2em;
+    color: var(--primary-text-color);
 }
 
 #queue-list {
@@ -315,13 +337,6 @@ const styles = `
     display: none;
 }
 
-.queue-content h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-    color: var(--primary-text-color);
-}
-
 /* Responsive Design */
 @media (max-width: 600px) {
     .queue-popup {
@@ -350,15 +365,15 @@ class SonosCustomPlayerCard extends HTMLElement {
     _hass;
     _elements = {};
     progressInterval = null;
+    _previousVolume = null;
 
     constructor() {
         console.log("constructor()");
         super();
+        this._elements = {};  // Inizializziamo _elements come oggetto vuoto
         this.doCard();
         this.doStyle();
         this.doAttach();
-        this.doQueryElements();
-        this.doListen();
     }
 
     setConfig(config) {
@@ -366,6 +381,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         this._config = config;
         this.doCheckConfig();
         this.doUpdateConfig();
+        this.doQueryElements();  // Chiamiamo doQueryElements qui
     }
 
     set hass(hass) {
@@ -572,12 +588,30 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     onVolumeIconClicked() {
-        const isMuted = this.getAttributes().is_volume_muted;
-        const newMuteState = !isMuted;
-        this._hass.callService("media_player", "volume_mute", {
-            entity_id: this.getEntityID(),
-            is_volume_muted: newMuteState
-        });
+        const state = this.getState();
+        const isMuted = state.attributes.is_volume_muted;
+        const currentVolume = state.attributes.volume_level;
+    
+        if (isMuted) {
+            // Se è già in muto, ripristina il volume precedente
+            const volumeToSet = this._previousVolume !== null ? this._previousVolume : 0.5; // Default a 0.5 se non c'è un volume precedente
+            this._hass.callService("media_player", "volume_set", {
+                entity_id: this.getEntityID(),
+                volume_level: volumeToSet
+            });
+            this._hass.callService("media_player", "volume_mute", {
+                entity_id: this.getEntityID(),
+                is_volume_muted: false
+            });
+            this._previousVolume = null;
+        } else {
+            // Se non è in muto, memorizza il volume attuale e metti in muto
+            this._previousVolume = currentVolume;
+            this._hass.callService("media_player", "volume_mute", {
+                entity_id: this.getEntityID(),
+                is_volume_muted: true
+            });
+        }
     }
 
     onQueueClicked() {
@@ -750,34 +784,34 @@ class SonosCustomPlayerCard extends HTMLElement {
                     </div>
                     <ha-icon class="media-source-icon"></ha-icon>
                 </div>
-                <div class="volume-control">
-                    <ha-icon id="volume-icon" class="volume-icon" icon="mdi:volume-high"></ha-icon>
-                    <input type="range" id="volume" name="volume" min="0" max="100">
-                </div>
-                <div class="media-controls">
-                    <div class="playback-controls">
-                        <ha-icon id="prev-track" icon="mdi:skip-previous-outline"></ha-icon>
+                <div class="controls-row">
+                    <div class="play-pause-control">
                         <ha-icon id="play-pause" icon="mdi:play-outline"></ha-icon>
-                        <ha-icon id="next-track" icon="mdi:skip-next-outline"></ha-icon>
                     </div>
-                    <div class="extra-controls">
-                        <ha-icon id="repeat" icon="mdi:repeat-off"></ha-icon>
-                        <ha-icon id="shuffle" icon="mdi:shuffle-disabled"></ha-icon>
-                        <ha-icon id="queue" icon="mdi:playlist-music"></ha-icon>
+                    <div class="volume-control">
+                        <ha-icon id="volume-icon" class="volume-icon" icon="mdi:volume-high"></ha-icon>
+                        <input type="range" id="volume" name="volume" min="0" max="100">
                     </div>
                 </div>
                 <div class="progress-control">
-                    <div class="time-display">
-                        <span class="current-time">0:00</span>
-                    </div>
+                    <span class="current-time">0:00</span>
                     <div class="progress-bar-container">
                         <div class="progress-bar">
                             <div class="progress-bar-fill"></div>
                         </div>
                         <input type="range" id="progress" name="progress" min="0" max="100" value="0">
                     </div>
-                    <div class="time-display">
-                        <span class="duration">0:00</span>
+                    <span class="duration">0:00</span>
+                </div>
+                <div class="bottom-controls">
+                    <div class="track-controls">
+                        <ha-icon id="prev-track" icon="mdi:skip-previous-outline"></ha-icon>
+                        <ha-icon id="next-track" icon="mdi:skip-next-outline"></ha-icon>
+                    </div>
+                    <div class="extra-controls">
+                        <ha-icon id="repeat" icon="mdi:repeat-off"></ha-icon>
+                        <ha-icon id="shuffle" icon="mdi:shuffle-disabled"></ha-icon>
+                        <ha-icon id="queue" icon="mdi:playlist-music"></ha-icon>
                     </div>
                 </div>
             </div>
@@ -796,50 +830,105 @@ class SonosCustomPlayerCard extends HTMLElement {
         this._elements.style.textContent = styles;
     }
 
-doAttach() {
-        console.log("doAttach()");
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.append(this._elements.style, this._elements.card);
+    doAttach() {
+            console.log("doAttach()");
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.append(this._elements.style, this._elements.card);
     }
 
     doQueryElements() {
         console.log("doQueryElements()");
-        const card = this._elements.card;
-        this._elements.error = card.querySelector(".error");
-        this._elements.albumArt = card.querySelector(".album-art");
-        this._elements.mediaTitle = card.querySelector(".media-title");
-        this._elements.mediaArtist = card.querySelector(".media-artist");
-        this._elements.mediaAlbum = card.querySelector(".media-album");
-        this._elements.mediaSourceIcon = card.querySelector(".media-source-icon");
-        this._elements.volumeIcon = card.querySelector("#volume-icon");
-        this._elements.volumeSlider = card.querySelector("#volume");
-        this._elements.playPause = card.querySelector("#play-pause");
-        this._elements.nextTrack = card.querySelector("#next-track");
-        this._elements.prevTrack = card.querySelector("#prev-track");
-        this._elements.shuffle = card.querySelector("#shuffle");
-        this._elements.repeat = card.querySelector("#repeat");
-        this._elements.progressSlider = card.querySelector("#progress");
-        this._elements.currentTime = card.querySelector(".current-time");
-        this._elements.duration = card.querySelector(".duration");
-        this._elements.progressBar = card.querySelector(".progress-bar-fill");
-        this._elements.queueButton = card.querySelector("#queue");
-        this._elements.queueOverlay = this.shadowRoot.querySelector("#queue-overlay");
-        this._elements.queuePopup = this.shadowRoot.querySelector("#queue-popup");
-        this._elements.queueList = this.shadowRoot.querySelector("#queue-list");
+        if (!this.shadowRoot) {
+            console.warn("Shadow root not available, deferring element query");
+            return;
+        }
+    
+        const card = this.shadowRoot.querySelector("ha-card");
+        if (!card) {
+            console.warn("Card element not found, deferring element query");
+            return;
+        }
+    
+        this._elements = {
+            card: card,
+            error: card.querySelector(".error"),
+            albumArt: card.querySelector(".album-art"),
+            mediaTitle: card.querySelector(".media-title"),
+            mediaArtist: card.querySelector(".media-artist"),
+            mediaAlbum: card.querySelector(".media-album"),
+            mediaSourceIcon: card.querySelector(".media-source-icon"),
+            volumeIcon: card.querySelector("#volume-icon"),
+            volumeSlider: card.querySelector("#volume"),
+            playPause: card.querySelector("#play-pause"),
+            nextTrack: card.querySelector("#next-track"),
+            prevTrack: card.querySelector("#prev-track"),
+            shuffle: card.querySelector("#shuffle"),
+            repeat: card.querySelector("#repeat"),
+            progressSlider: card.querySelector("#progress"),
+            currentTime: card.querySelector(".current-time"),
+            duration: card.querySelector(".duration"),
+            progressBar: card.querySelector(".progress-bar-fill"),
+            queueButton: card.querySelector("#queue"),
+            queueOverlay: this.shadowRoot.querySelector("#queue-overlay"),
+            queuePopup: this.shadowRoot.querySelector("#queue-popup"),
+            queueList: this.shadowRoot.querySelector("#queue-list")
+        };
+    
+        // Log degli elementi non trovati
+        for (const [key, element] of Object.entries(this._elements)) {
+            if (!element) {
+                console.warn(`Element ${key} not found`);
+            }
+        }
     }
 
     doListen() {
         console.log("doListen()");
-        this._elements.volumeIcon.addEventListener("click", this.onVolumeIconClicked.bind(this));
-        this._elements.volumeSlider.addEventListener("input", this.onVolumeChanged.bind(this));
-        this._elements.playPause.addEventListener("click", this.onPlayPause.bind(this));
-        this._elements.nextTrack.addEventListener("click", this.onNextTrack.bind(this));
-        this._elements.prevTrack.addEventListener("click", this.onPrevTrack.bind(this));
-        this._elements.shuffle.addEventListener("click", this.onShuffleChanged.bind(this));
-        this._elements.repeat.addEventListener("click", this.onRepeatChanged.bind(this));
-        this._elements.progressSlider.addEventListener("input", this.onProgressChanged.bind(this));
-        this._elements.queueButton.addEventListener("click", this.onQueueClicked.bind(this));
-        this._elements.queueOverlay.addEventListener('click', () => this.toggleQueuePopup(false));
+        // Creiamo versioni bound dei nostri metodi di gestione eventi
+        this.boundOnVolumeIconClicked = this.onVolumeIconClicked.bind(this);
+        this.boundOnVolumeChanged = this.onVolumeChanged.bind(this);
+        this.boundOnPlayPause = this.onPlayPause.bind(this);
+        this.boundOnNextTrack = this.onNextTrack.bind(this);
+        this.boundOnPrevTrack = this.onPrevTrack.bind(this);
+        this.boundOnShuffleChanged = this.onShuffleChanged.bind(this);
+        this.boundOnRepeatChanged = this.onRepeatChanged.bind(this);
+        this.boundOnProgressChanged = this.onProgressChanged.bind(this);
+        this.boundOnQueueClicked = this.onQueueClicked.bind(this);
+        this.boundToggleQueuePopup = () => this.toggleQueuePopup(false);
+        this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+    
+        // Aggiungiamo gli event listener
+        if (this._elements.volumeIcon) {
+            this._elements.volumeIcon.addEventListener("click", this.boundOnVolumeIconClicked);
+        }
+        if (this._elements.volumeSlider) {
+            this._elements.volumeSlider.addEventListener("input", this.boundOnVolumeChanged);
+        }
+        if (this._elements.playPause) {
+            this._elements.playPause.addEventListener("click", this.boundOnPlayPause);
+        }
+        if (this._elements.nextTrack) {
+            this._elements.nextTrack.addEventListener("click", this.boundOnNextTrack);
+        }
+        if (this._elements.prevTrack) {
+            this._elements.prevTrack.addEventListener("click", this.boundOnPrevTrack);
+        }
+        if (this._elements.shuffle) {
+            this._elements.shuffle.addEventListener("click", this.boundOnShuffleChanged);
+        }
+        if (this._elements.repeat) {
+            this._elements.repeat.addEventListener("click", this.boundOnRepeatChanged);
+        }
+        if (this._elements.progressSlider) {
+            this._elements.progressSlider.addEventListener("input", this.boundOnProgressChanged);
+        }
+        if (this._elements.queueButton) {
+            this._elements.queueButton.addEventListener("click", this.boundOnQueueClicked);
+        }
+        if (this._elements.queueOverlay) {
+            this._elements.queueOverlay.addEventListener("click", this.boundToggleQueuePopup);
+        }
+        document.addEventListener("click", this.boundHandleOutsideClick);
     }
 
     toggleQueuePopup(show) {
@@ -913,17 +1002,34 @@ doAttach() {
             }
     
             const progress = this.lastKnownPosition / state.attributes.media_duration;
-            this._elements.progressSlider.value = progress * 100;
+            
+            // Aggiungiamo un controllo per this._elements.progressSlider
+            if (this._elements.progressSlider) {
+                this._elements.progressSlider.value = progress * 100;
+            } else {
+                console.warn("Progress slider element not found");
+            }
+    
             this.updateSeekBarProgress(progress);
-            this._elements.currentTime.textContent = this.formatTime(this.lastKnownPosition);
-            this._elements.duration.textContent = this.formatTime(state.attributes.media_duration);
+    
+            // Aggiungiamo controlli anche per currentTime e duration
+            if (this._elements.currentTime) {
+                this._elements.currentTime.textContent = this.formatTime(this.lastKnownPosition);
+            }
+            if (this._elements.duration) {
+                this._elements.duration.textContent = this.formatTime(state.attributes.media_duration);
+            }
+        } else {
+            console.warn("Media duration not available or state is null");
         }
     }
 
     updateSeekBarProgress(progress) {
-        const percent = (progress * 100).toFixed(2);
-        this._elements.progressBar.style.width = `${percent}%`;
-        console.log("Updated progress bar width:", percent + "%");
+        if (this._elements.progressBar) {
+            const percent = (progress * 100).toFixed(2);
+            this._elements.progressBar.style.width = `${percent}%`;
+            console.log("Updated progress bar width:", percent + "%");
+        }
     }
 
     doUpdateHass() {
@@ -932,34 +1038,101 @@ doAttach() {
         
         if (!state || state.state === "unavailable" || state.state === "idle") {
             console.log("Player non disponibile o inattivo");
-            this._elements.error.textContent = `Player ${this.getName()} non disponibile!`;
-            this._elements.error.classList.remove("hidden");
-            this._elements.card.classList.add("unavailable");
-            this._elements.card.querySelector('.media-info').style.display = 'none';
-            this._elements.card.querySelector('.progress-control').style.display = 'none';
-            this._elements.card.querySelector('.volume-control').style.display = 'none';
-            this._elements.card.querySelector('.media-controls').style.display = 'none';
+            if (this._elements.error) {
+                this._elements.error.textContent = `Player ${this.getName()} non disponibile!`;
+                this._elements.error.classList.remove("hidden");
+            }
+            if (this._elements.card) {
+                this._elements.card.classList.add("unavailable");
+            }
+            
+            this.hideElements();
             this.stopProgressUpdate();
             return;
         }
     
-        this._elements.error.textContent = "";
-        this._elements.error.classList.add("hidden");
-        this._elements.card.classList.remove("unavailable");
-        this._elements.card.querySelector('.media-info').style.display = 'flex';
-        this._elements.card.querySelector('.progress-control').style.display = 'flex';
-        this._elements.card.querySelector('.volume-control').style.display = 'flex';
-        this._elements.card.querySelector('.media-controls').style.display = 'flex';
-    
-        this._elements.card.classList.add("loading");
+        this.showElements();
         
         if (state.attributes) {
-            this._elements.albumArt.src = state.attributes.entity_picture || '';
-            this._elements.mediaTitle.textContent = state.attributes.media_title || 'Sconosciuto';
-            this._elements.mediaArtist.textContent = state.attributes.media_artist || 'Sconosciuto';
-            this._elements.mediaAlbum.textContent = state.attributes.media_album_name || 'Sconosciuto';
+            this.updateMediaInfo(state.attributes);
+            this.updateControls(state);
+        } else {
+            console.error("Attributi dello stato non disponibili");
+            if (this._elements.error) {
+                this._elements.error.textContent = "Impossibile recuperare le informazioni del media";
+                this._elements.error.classList.remove("hidden");
+            }
+        }
     
-            const mediaContentId = state.attributes.media_content_id;
+        this.updatePlaybackState(state);
+    }
+    
+    hideElements() {
+        ['mediaInfo', 'progressControl', 'volumeControl', 'mediaControls'].forEach(elementName => {
+            const element = this._elements.card && this._elements.card.querySelector(`.${elementName}`);
+            if (element) element.style.display = 'none';
+        });
+    }
+    
+    showElements() {
+        if (this._elements.error) {
+            this._elements.error.textContent = "";
+            this._elements.error.classList.add("hidden");
+        }
+        if (this._elements.card) {
+            this._elements.card.classList.remove("unavailable");
+            ['mediaInfo', 'progressControl', 'volumeControl', 'mediaControls'].forEach(elementName => {
+                const element = this._elements.card.querySelector(`.${elementName}`);
+                if (element) element.style.display = 'flex';
+            });
+            this._elements.card.classList.add("loading");
+        }
+    }
+    
+    updateMediaInfo(attributes) {
+        if (this._elements.albumArt) this._elements.albumArt.src = attributes.entity_picture || '';
+        if (this._elements.mediaTitle) this._elements.mediaTitle.textContent = attributes.media_title || 'Sconosciuto';
+        if (this._elements.mediaArtist) this._elements.mediaArtist.textContent = attributes.media_artist || 'Sconosciuto';
+        if (this._elements.mediaAlbum) this._elements.mediaAlbum.textContent = attributes.media_album_name || 'Sconosciuto';
+        
+        // Aggiorna l'icona della sorgente media
+        this.updateMediaSourceIcon(attributes.media_content_id);
+    }
+    
+    updateControls(state) {
+        const isMuted = state.attributes.is_volume_muted;
+        if (this._elements.volumeIcon) {
+            const volumeIcon = isMuted ? "mdi:volume-off" : "mdi:volume-high";
+            this._elements.volumeIcon.setAttribute("icon", volumeIcon);
+        }
+        
+        if (!isMuted && this._elements.volumeSlider) {
+            this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
+        }
+    
+        if (this._elements.playPause) {
+            const playPauseIcon = state.state === "playing" ? "mdi:pause" : "mdi:play";
+            this._elements.playPause.setAttribute("icon", playPauseIcon);
+        }
+    
+        if (this._elements.shuffle) {
+            const shuffleIcon = state.attributes.shuffle ? "mdi:shuffle" : "mdi:shuffle-disabled";
+            this._elements.shuffle.setAttribute("icon", shuffleIcon);
+        }
+    
+        if (this._elements.repeat) {
+            const repeatIconMap = {
+                'off': 'mdi:repeat-off',
+                'all': 'mdi:repeat',
+                'one': 'mdi:repeat-once'
+            };
+            const repeatIcon = repeatIconMap[state.attributes.repeat] || 'mdi:repeat-off';
+            this._elements.repeat.setAttribute("icon", repeatIcon);
+        }
+    }
+    
+    updateMediaSourceIcon(mediaContentId) {
+        if (this._elements.mediaSourceIcon) {
             if (mediaContentId && typeof mediaContentId === 'string') {
                 if (mediaContentId.includes("x-sonos-http")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:plex");
@@ -971,38 +1144,17 @@ doAttach() {
             } else {
                 this._elements.mediaSourceIcon.removeAttribute("icon");
             }
-    
-            const isMuted = state.attributes.is_volume_muted;
-            const volumeIcon = isMuted ? "mdi:volume-off" : "mdi:volume-high";
-            this._elements.volumeIcon.setAttribute("icon", volumeIcon);
-            this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
-    
-            const playPauseIcon = state.state === "playing" ? "mdi:pause" : "mdi:play";
-            this._elements.playPause.setAttribute("icon", playPauseIcon);
-    
-            const shuffleIcon = state.attributes.shuffle ? "mdi:shuffle" : "mdi:shuffle-disabled";
-            this._elements.shuffle.setAttribute("icon", shuffleIcon);
-    
-            const repeatIconMap = {
-                'off': 'mdi:repeat-off',
-                'all': 'mdi:repeat',
-                'one': 'mdi:repeat-once'
-            };
-            const repeatIcon = repeatIconMap[state.attributes.repeat] || 'mdi:repeat-off';
-            this._elements.repeat.setAttribute("icon", repeatIcon);
-    
-            if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
-                this.lastKnownPosition = state.attributes.media_position || 0;
-                this._lastKnownTitle = state.attributes.media_title;
-            }
-            this.lastUpdateTime = performance.now();
-    
-            this._elements.card.classList.remove("loading");
-        } else {
-            console.error("Attributi dello stato non disponibili");
-            this._elements.error.textContent = "Impossibile recuperare le informazioni del media";
-            this._elements.error.classList.remove("hidden");
         }
+    }
+    
+    updatePlaybackState(state) {
+        if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
+            this.lastKnownPosition = state.attributes.media_position || 0;
+            this._lastKnownTitle = state.attributes.media_title;
+        }
+        this.lastUpdateTime = performance.now();
+    
+        if (this._elements.card) this._elements.card.classList.remove("loading");
     
         if (state.state === "playing" && !this.isPlaying) {
             console.log("Starting progress update for playing state");
@@ -1013,8 +1165,8 @@ doAttach() {
             this.stopProgressUpdate();
             this.updateProgress();
         }
-
-        if (!this._elements.queuePopup.classList.contains('hidden')) {
+    
+        if (this._elements.queuePopup && !this._elements.queuePopup.classList.contains('hidden')) {
             this.updateCurrentTrack();
         }
     }
@@ -1047,11 +1199,63 @@ doAttach() {
         });
     }
 
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.stopProgressUpdate();
-        document.removeEventListener('click', this.handleOutsideClick);
+
+    connectedCallback() {
+        console.log("connectedCallback()");
+        if (super.connectedCallback) {
+            super.connectedCallback();
+        }
+        this.doQueryElements();
+        this.doListen();
     }
+
+
+    disconnectedCallback() {
+        console.log("disconnectedCallback()");
+        if (super.disconnectedCallback) {
+            super.disconnectedCallback();
+        }
+        this.stopProgressUpdate();
+        // Rimuovi eventuali listener di eventi qui
+        this.removeEventListeners();
+    }
+
+    removeEventListeners() {
+        console.log("removeEventListeners()");
+        if (this._elements.volumeIcon) {
+            this._elements.volumeIcon.removeEventListener("click", this.boundOnVolumeIconClicked);
+        }
+        if (this._elements.volumeSlider) {
+            this._elements.volumeSlider.removeEventListener("input", this.boundOnVolumeChanged);
+        }
+        if (this._elements.playPause) {
+            this._elements.playPause.removeEventListener("click", this.boundOnPlayPause);
+        }
+        if (this._elements.nextTrack) {
+            this._elements.nextTrack.removeEventListener("click", this.boundOnNextTrack);
+        }
+        if (this._elements.prevTrack) {
+            this._elements.prevTrack.removeEventListener("click", this.boundOnPrevTrack);
+        }
+        if (this._elements.shuffle) {
+            this._elements.shuffle.removeEventListener("click", this.boundOnShuffleChanged);
+        }
+        if (this._elements.repeat) {
+            this._elements.repeat.removeEventListener("click", this.boundOnRepeatChanged);
+        }
+        if (this._elements.progressSlider) {
+            this._elements.progressSlider.removeEventListener("input", this.boundOnProgressChanged);
+        }
+        if (this._elements.queueButton) {
+            this._elements.queueButton.removeEventListener("click", this.boundOnQueueClicked);
+        }
+        if (this._elements.queueOverlay) {
+            this._elements.queueOverlay.removeEventListener("click", this.boundToggleQueuePopup);
+        }
+        document.removeEventListener("click", this.boundHandleOutsideClick);
+    }
+
+
 
     static getConfigElement() {
         return document.createElement("toggle-with-graphical-configuration-editor");

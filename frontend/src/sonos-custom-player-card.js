@@ -10,11 +10,10 @@ class SonosCustomPlayerCard extends HTMLElement {
     constructor() {
         console.log("constructor()");
         super();
+        this._elements = {};  // Inizializziamo _elements come oggetto vuoto
         this.doCard();
         this.doStyle();
         this.doAttach();
-        this.doQueryElements();
-        this.doListen();
     }
 
     setConfig(config) {
@@ -22,6 +21,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         this._config = config;
         this.doCheckConfig();
         this.doUpdateConfig();
+        this.doQueryElements();  // Chiamiamo doQueryElements qui
     }
 
     set hass(hass) {
@@ -65,12 +65,11 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     onVolumeChanged(event) {
-        const volume = event.target.value / 100;
+        const volume = event.target.value;
         this._hass.callService("media_player", "volume_set", {
             entity_id: this.getEntityID(),
-            volume_level: volume
+            volume_level: volume / 100
         });
-        this._previousVolume = volume;
     }
 
     syncPositionWithServer() {
@@ -425,34 +424,34 @@ class SonosCustomPlayerCard extends HTMLElement {
                     </div>
                     <ha-icon class="media-source-icon"></ha-icon>
                 </div>
-                <div class="volume-control">
-                    <ha-icon id="volume-icon" class="volume-icon" icon="mdi:volume-high"></ha-icon>
-                    <input type="range" id="volume" name="volume" min="0" max="100">
-                </div>
-                <div class="media-controls">
-                    <div class="playback-controls">
-                        <ha-icon id="prev-track" icon="mdi:skip-previous-outline"></ha-icon>
+                <div class="controls-row">
+                    <div class="play-pause-control">
                         <ha-icon id="play-pause" icon="mdi:play-outline"></ha-icon>
-                        <ha-icon id="next-track" icon="mdi:skip-next-outline"></ha-icon>
                     </div>
-                    <div class="extra-controls">
-                        <ha-icon id="repeat" icon="mdi:repeat-off"></ha-icon>
-                        <ha-icon id="shuffle" icon="mdi:shuffle-disabled"></ha-icon>
-                        <ha-icon id="queue" icon="mdi:playlist-music"></ha-icon>
+                    <div class="volume-control">
+                        <ha-icon id="volume-icon" class="volume-icon" icon="mdi:volume-high"></ha-icon>
+                        <input type="range" id="volume" name="volume" min="0" max="100">
                     </div>
                 </div>
                 <div class="progress-control">
-                    <div class="time-display">
-                        <span class="current-time">0:00</span>
-                    </div>
+                    <span class="current-time">0:00</span>
                     <div class="progress-bar-container">
                         <div class="progress-bar">
                             <div class="progress-bar-fill"></div>
                         </div>
                         <input type="range" id="progress" name="progress" min="0" max="100" value="0">
                     </div>
-                    <div class="time-display">
-                        <span class="duration">0:00</span>
+                    <span class="duration">0:00</span>
+                </div>
+                <div class="bottom-controls">
+                    <div class="track-controls">
+                        <ha-icon id="prev-track" icon="mdi:skip-previous-outline"></ha-icon>
+                        <ha-icon id="next-track" icon="mdi:skip-next-outline"></ha-icon>
+                    </div>
+                    <div class="extra-controls">
+                        <ha-icon id="repeat" icon="mdi:repeat-off"></ha-icon>
+                        <ha-icon id="shuffle" icon="mdi:shuffle-disabled"></ha-icon>
+                        <ha-icon id="queue" icon="mdi:playlist-music"></ha-icon>
                     </div>
                 </div>
             </div>
@@ -471,50 +470,105 @@ class SonosCustomPlayerCard extends HTMLElement {
         this._elements.style.textContent = styles;
     }
 
-doAttach() {
-        console.log("doAttach()");
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.append(this._elements.style, this._elements.card);
+    doAttach() {
+            console.log("doAttach()");
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.append(this._elements.style, this._elements.card);
     }
 
     doQueryElements() {
         console.log("doQueryElements()");
-        const card = this._elements.card;
-        this._elements.error = card.querySelector(".error");
-        this._elements.albumArt = card.querySelector(".album-art");
-        this._elements.mediaTitle = card.querySelector(".media-title");
-        this._elements.mediaArtist = card.querySelector(".media-artist");
-        this._elements.mediaAlbum = card.querySelector(".media-album");
-        this._elements.mediaSourceIcon = card.querySelector(".media-source-icon");
-        this._elements.volumeIcon = card.querySelector("#volume-icon");
-        this._elements.volumeSlider = card.querySelector("#volume");
-        this._elements.playPause = card.querySelector("#play-pause");
-        this._elements.nextTrack = card.querySelector("#next-track");
-        this._elements.prevTrack = card.querySelector("#prev-track");
-        this._elements.shuffle = card.querySelector("#shuffle");
-        this._elements.repeat = card.querySelector("#repeat");
-        this._elements.progressSlider = card.querySelector("#progress");
-        this._elements.currentTime = card.querySelector(".current-time");
-        this._elements.duration = card.querySelector(".duration");
-        this._elements.progressBar = card.querySelector(".progress-bar-fill");
-        this._elements.queueButton = card.querySelector("#queue");
-        this._elements.queueOverlay = this.shadowRoot.querySelector("#queue-overlay");
-        this._elements.queuePopup = this.shadowRoot.querySelector("#queue-popup");
-        this._elements.queueList = this.shadowRoot.querySelector("#queue-list");
+        if (!this.shadowRoot) {
+            console.warn("Shadow root not available, deferring element query");
+            return;
+        }
+    
+        const card = this.shadowRoot.querySelector("ha-card");
+        if (!card) {
+            console.warn("Card element not found, deferring element query");
+            return;
+        }
+    
+        this._elements = {
+            card: card,
+            error: card.querySelector(".error"),
+            albumArt: card.querySelector(".album-art"),
+            mediaTitle: card.querySelector(".media-title"),
+            mediaArtist: card.querySelector(".media-artist"),
+            mediaAlbum: card.querySelector(".media-album"),
+            mediaSourceIcon: card.querySelector(".media-source-icon"),
+            volumeIcon: card.querySelector("#volume-icon"),
+            volumeSlider: card.querySelector("#volume"),
+            playPause: card.querySelector("#play-pause"),
+            nextTrack: card.querySelector("#next-track"),
+            prevTrack: card.querySelector("#prev-track"),
+            shuffle: card.querySelector("#shuffle"),
+            repeat: card.querySelector("#repeat"),
+            progressSlider: card.querySelector("#progress"),
+            currentTime: card.querySelector(".current-time"),
+            duration: card.querySelector(".duration"),
+            progressBar: card.querySelector(".progress-bar-fill"),
+            queueButton: card.querySelector("#queue"),
+            queueOverlay: this.shadowRoot.querySelector("#queue-overlay"),
+            queuePopup: this.shadowRoot.querySelector("#queue-popup"),
+            queueList: this.shadowRoot.querySelector("#queue-list")
+        };
+    
+        // Log degli elementi non trovati
+        for (const [key, element] of Object.entries(this._elements)) {
+            if (!element) {
+                console.warn(`Element ${key} not found`);
+            }
+        }
     }
 
     doListen() {
         console.log("doListen()");
-        this._elements.volumeIcon.addEventListener("click", this.onVolumeIconClicked.bind(this));
-        this._elements.volumeSlider.addEventListener("input", this.onVolumeChanged.bind(this));
-        this._elements.playPause.addEventListener("click", this.onPlayPause.bind(this));
-        this._elements.nextTrack.addEventListener("click", this.onNextTrack.bind(this));
-        this._elements.prevTrack.addEventListener("click", this.onPrevTrack.bind(this));
-        this._elements.shuffle.addEventListener("click", this.onShuffleChanged.bind(this));
-        this._elements.repeat.addEventListener("click", this.onRepeatChanged.bind(this));
-        this._elements.progressSlider.addEventListener("input", this.onProgressChanged.bind(this));
-        this._elements.queueButton.addEventListener("click", this.onQueueClicked.bind(this));
-        this._elements.queueOverlay.addEventListener('click', () => this.toggleQueuePopup(false));
+        // Creiamo versioni bound dei nostri metodi di gestione eventi
+        this.boundOnVolumeIconClicked = this.onVolumeIconClicked.bind(this);
+        this.boundOnVolumeChanged = this.onVolumeChanged.bind(this);
+        this.boundOnPlayPause = this.onPlayPause.bind(this);
+        this.boundOnNextTrack = this.onNextTrack.bind(this);
+        this.boundOnPrevTrack = this.onPrevTrack.bind(this);
+        this.boundOnShuffleChanged = this.onShuffleChanged.bind(this);
+        this.boundOnRepeatChanged = this.onRepeatChanged.bind(this);
+        this.boundOnProgressChanged = this.onProgressChanged.bind(this);
+        this.boundOnQueueClicked = this.onQueueClicked.bind(this);
+        this.boundToggleQueuePopup = () => this.toggleQueuePopup(false);
+        this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+    
+        // Aggiungiamo gli event listener
+        if (this._elements.volumeIcon) {
+            this._elements.volumeIcon.addEventListener("click", this.boundOnVolumeIconClicked);
+        }
+        if (this._elements.volumeSlider) {
+            this._elements.volumeSlider.addEventListener("input", this.boundOnVolumeChanged);
+        }
+        if (this._elements.playPause) {
+            this._elements.playPause.addEventListener("click", this.boundOnPlayPause);
+        }
+        if (this._elements.nextTrack) {
+            this._elements.nextTrack.addEventListener("click", this.boundOnNextTrack);
+        }
+        if (this._elements.prevTrack) {
+            this._elements.prevTrack.addEventListener("click", this.boundOnPrevTrack);
+        }
+        if (this._elements.shuffle) {
+            this._elements.shuffle.addEventListener("click", this.boundOnShuffleChanged);
+        }
+        if (this._elements.repeat) {
+            this._elements.repeat.addEventListener("click", this.boundOnRepeatChanged);
+        }
+        if (this._elements.progressSlider) {
+            this._elements.progressSlider.addEventListener("input", this.boundOnProgressChanged);
+        }
+        if (this._elements.queueButton) {
+            this._elements.queueButton.addEventListener("click", this.boundOnQueueClicked);
+        }
+        if (this._elements.queueOverlay) {
+            this._elements.queueOverlay.addEventListener("click", this.boundToggleQueuePopup);
+        }
+        document.addEventListener("click", this.boundHandleOutsideClick);
     }
 
     toggleQueuePopup(show) {
@@ -588,17 +642,34 @@ doAttach() {
             }
     
             const progress = this.lastKnownPosition / state.attributes.media_duration;
-            this._elements.progressSlider.value = progress * 100;
+            
+            // Aggiungiamo un controllo per this._elements.progressSlider
+            if (this._elements.progressSlider) {
+                this._elements.progressSlider.value = progress * 100;
+            } else {
+                console.warn("Progress slider element not found");
+            }
+    
             this.updateSeekBarProgress(progress);
-            this._elements.currentTime.textContent = this.formatTime(this.lastKnownPosition);
-            this._elements.duration.textContent = this.formatTime(state.attributes.media_duration);
+    
+            // Aggiungiamo controlli anche per currentTime e duration
+            if (this._elements.currentTime) {
+                this._elements.currentTime.textContent = this.formatTime(this.lastKnownPosition);
+            }
+            if (this._elements.duration) {
+                this._elements.duration.textContent = this.formatTime(state.attributes.media_duration);
+            }
+        } else {
+            console.warn("Media duration not available or state is null");
         }
     }
 
     updateSeekBarProgress(progress) {
-        const percent = (progress * 100).toFixed(2);
-        this._elements.progressBar.style.width = `${percent}%`;
-        console.log("Updated progress bar width:", percent + "%");
+        if (this._elements.progressBar) {
+            const percent = (progress * 100).toFixed(2);
+            this._elements.progressBar.style.width = `${percent}%`;
+            console.log("Updated progress bar width:", percent + "%");
+        }
     }
 
     doUpdateHass() {
@@ -607,44 +678,101 @@ doAttach() {
         
         if (!state || state.state === "unavailable" || state.state === "idle") {
             console.log("Player non disponibile o inattivo");
-            this._elements.error.textContent = `Player ${this.getName()} non disponibile!`;
-            this._elements.error.classList.remove("hidden");
-            this._elements.card.classList.add("unavailable");
-            this._elements.card.querySelector('.media-info').style.display = 'none';
-            this._elements.card.querySelector('.progress-control').style.display = 'none';
-            this._elements.card.querySelector('.volume-control').style.display = 'none';
-            this._elements.card.querySelector('.media-controls').style.display = 'none';
+            if (this._elements.error) {
+                this._elements.error.textContent = `Player ${this.getName()} non disponibile!`;
+                this._elements.error.classList.remove("hidden");
+            }
+            if (this._elements.card) {
+                this._elements.card.classList.add("unavailable");
+            }
+            
+            this.hideElements();
             this.stopProgressUpdate();
             return;
         }
     
-        this._elements.error.textContent = "";
-        this._elements.error.classList.add("hidden");
-        this._elements.card.classList.remove("unavailable");
-        this._elements.card.querySelector('.media-info').style.display = 'flex';
-        this._elements.card.querySelector('.progress-control').style.display = 'flex';
-        this._elements.card.querySelector('.volume-control').style.display = 'flex';
-        this._elements.card.querySelector('.media-controls').style.display = 'flex';
-    
-        this._elements.card.classList.add("loading");
+        this.showElements();
         
         if (state.attributes) {
-            this._elements.albumArt.src = state.attributes.entity_picture || '';
-            this._elements.mediaTitle.textContent = state.attributes.media_title || 'Sconosciuto';
-            this._elements.mediaArtist.textContent = state.attributes.media_artist || 'Sconosciuto';
-            this._elements.mediaAlbum.textContent = state.attributes.media_album_name || 'Sconosciuto';
-
-            const isMuted = state.attributes.is_volume_muted;
+            this.updateMediaInfo(state.attributes);
+            this.updateControls(state);
+        } else {
+            console.error("Attributi dello stato non disponibili");
+            if (this._elements.error) {
+                this._elements.error.textContent = "Impossibile recuperare le informazioni del media";
+                this._elements.error.classList.remove("hidden");
+            }
+        }
+    
+        this.updatePlaybackState(state);
+    }
+    
+    hideElements() {
+        ['mediaInfo', 'progressControl', 'volumeControl', 'mediaControls'].forEach(elementName => {
+            const element = this._elements.card && this._elements.card.querySelector(`.${elementName}`);
+            if (element) element.style.display = 'none';
+        });
+    }
+    
+    showElements() {
+        if (this._elements.error) {
+            this._elements.error.textContent = "";
+            this._elements.error.classList.add("hidden");
+        }
+        if (this._elements.card) {
+            this._elements.card.classList.remove("unavailable");
+            ['mediaInfo', 'progressControl', 'volumeControl', 'mediaControls'].forEach(elementName => {
+                const element = this._elements.card.querySelector(`.${elementName}`);
+                if (element) element.style.display = 'flex';
+            });
+            this._elements.card.classList.add("loading");
+        }
+    }
+    
+    updateMediaInfo(attributes) {
+        if (this._elements.albumArt) this._elements.albumArt.src = attributes.entity_picture || '';
+        if (this._elements.mediaTitle) this._elements.mediaTitle.textContent = attributes.media_title || 'Sconosciuto';
+        if (this._elements.mediaArtist) this._elements.mediaArtist.textContent = attributes.media_artist || 'Sconosciuto';
+        if (this._elements.mediaAlbum) this._elements.mediaAlbum.textContent = attributes.media_album_name || 'Sconosciuto';
+        
+        // Aggiorna l'icona della sorgente media
+        this.updateMediaSourceIcon(attributes.media_content_id);
+    }
+    
+    updateControls(state) {
+        const isMuted = state.attributes.is_volume_muted;
+        if (this._elements.volumeIcon) {
             const volumeIcon = isMuted ? "mdi:volume-off" : "mdi:volume-high";
             this._elements.volumeIcon.setAttribute("icon", volumeIcon);
-            
-            if (!isMuted) {
-                this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
-            }
-
-
+        }
+        
+        if (!isMuted && this._elements.volumeSlider) {
+            this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
+        }
     
-            const mediaContentId = state.attributes.media_content_id;
+        if (this._elements.playPause) {
+            const playPauseIcon = state.state === "playing" ? "mdi:pause" : "mdi:play";
+            this._elements.playPause.setAttribute("icon", playPauseIcon);
+        }
+    
+        if (this._elements.shuffle) {
+            const shuffleIcon = state.attributes.shuffle ? "mdi:shuffle" : "mdi:shuffle-disabled";
+            this._elements.shuffle.setAttribute("icon", shuffleIcon);
+        }
+    
+        if (this._elements.repeat) {
+            const repeatIconMap = {
+                'off': 'mdi:repeat-off',
+                'all': 'mdi:repeat',
+                'one': 'mdi:repeat-once'
+            };
+            const repeatIcon = repeatIconMap[state.attributes.repeat] || 'mdi:repeat-off';
+            this._elements.repeat.setAttribute("icon", repeatIcon);
+        }
+    }
+    
+    updateMediaSourceIcon(mediaContentId) {
+        if (this._elements.mediaSourceIcon) {
             if (mediaContentId && typeof mediaContentId === 'string') {
                 if (mediaContentId.includes("x-sonos-http")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:plex");
@@ -656,38 +784,17 @@ doAttach() {
             } else {
                 this._elements.mediaSourceIcon.removeAttribute("icon");
             }
-    
-            const isMuted = state.attributes.is_volume_muted;
-            const volumeIcon = isMuted ? "mdi:volume-off" : "mdi:volume-high";
-            this._elements.volumeIcon.setAttribute("icon", volumeIcon);
-            this._elements.volumeSlider.value = (state.attributes.volume_level || 0) * 100;
-    
-            const playPauseIcon = state.state === "playing" ? "mdi:pause" : "mdi:play";
-            this._elements.playPause.setAttribute("icon", playPauseIcon);
-    
-            const shuffleIcon = state.attributes.shuffle ? "mdi:shuffle" : "mdi:shuffle-disabled";
-            this._elements.shuffle.setAttribute("icon", shuffleIcon);
-    
-            const repeatIconMap = {
-                'off': 'mdi:repeat-off',
-                'all': 'mdi:repeat',
-                'one': 'mdi:repeat-once'
-            };
-            const repeatIcon = repeatIconMap[state.attributes.repeat] || 'mdi:repeat-off';
-            this._elements.repeat.setAttribute("icon", repeatIcon);
-    
-            if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
-                this.lastKnownPosition = state.attributes.media_position || 0;
-                this._lastKnownTitle = state.attributes.media_title;
-            }
-            this.lastUpdateTime = performance.now();
-    
-            this._elements.card.classList.remove("loading");
-        } else {
-            console.error("Attributi dello stato non disponibili");
-            this._elements.error.textContent = "Impossibile recuperare le informazioni del media";
-            this._elements.error.classList.remove("hidden");
         }
+    }
+    
+    updatePlaybackState(state) {
+        if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
+            this.lastKnownPosition = state.attributes.media_position || 0;
+            this._lastKnownTitle = state.attributes.media_title;
+        }
+        this.lastUpdateTime = performance.now();
+    
+        if (this._elements.card) this._elements.card.classList.remove("loading");
     
         if (state.state === "playing" && !this.isPlaying) {
             console.log("Starting progress update for playing state");
@@ -698,8 +805,8 @@ doAttach() {
             this.stopProgressUpdate();
             this.updateProgress();
         }
-
-        if (!this._elements.queuePopup.classList.contains('hidden')) {
+    
+        if (this._elements.queuePopup && !this._elements.queuePopup.classList.contains('hidden')) {
             this.updateCurrentTrack();
         }
     }
@@ -732,11 +839,63 @@ doAttach() {
         });
     }
 
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.stopProgressUpdate();
-        document.removeEventListener('click', this.handleOutsideClick);
+
+    connectedCallback() {
+        console.log("connectedCallback()");
+        if (super.connectedCallback) {
+            super.connectedCallback();
+        }
+        this.doQueryElements();
+        this.doListen();
     }
+
+
+    disconnectedCallback() {
+        console.log("disconnectedCallback()");
+        if (super.disconnectedCallback) {
+            super.disconnectedCallback();
+        }
+        this.stopProgressUpdate();
+        // Rimuovi eventuali listener di eventi qui
+        this.removeEventListeners();
+    }
+
+    removeEventListeners() {
+        console.log("removeEventListeners()");
+        if (this._elements.volumeIcon) {
+            this._elements.volumeIcon.removeEventListener("click", this.boundOnVolumeIconClicked);
+        }
+        if (this._elements.volumeSlider) {
+            this._elements.volumeSlider.removeEventListener("input", this.boundOnVolumeChanged);
+        }
+        if (this._elements.playPause) {
+            this._elements.playPause.removeEventListener("click", this.boundOnPlayPause);
+        }
+        if (this._elements.nextTrack) {
+            this._elements.nextTrack.removeEventListener("click", this.boundOnNextTrack);
+        }
+        if (this._elements.prevTrack) {
+            this._elements.prevTrack.removeEventListener("click", this.boundOnPrevTrack);
+        }
+        if (this._elements.shuffle) {
+            this._elements.shuffle.removeEventListener("click", this.boundOnShuffleChanged);
+        }
+        if (this._elements.repeat) {
+            this._elements.repeat.removeEventListener("click", this.boundOnRepeatChanged);
+        }
+        if (this._elements.progressSlider) {
+            this._elements.progressSlider.removeEventListener("input", this.boundOnProgressChanged);
+        }
+        if (this._elements.queueButton) {
+            this._elements.queueButton.removeEventListener("click", this.boundOnQueueClicked);
+        }
+        if (this._elements.queueOverlay) {
+            this._elements.queueOverlay.removeEventListener("click", this.boundToggleQueuePopup);
+        }
+        document.removeEventListener("click", this.boundHandleOutsideClick);
+    }
+
+
 
     static getConfigElement() {
         return document.createElement("toggle-with-graphical-configuration-editor");
