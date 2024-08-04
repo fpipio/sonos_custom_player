@@ -288,9 +288,7 @@ const styles = `
 .track-number {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
+    color: black;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -299,9 +297,7 @@ const styles = `
     flex-shrink: 0;
 }
 
-.current-track .track-number {
-    background-color: var(--accent-color, #f0f0f0);
-}
+
 
 .track-info {
     display: flex;
