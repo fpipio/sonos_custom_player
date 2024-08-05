@@ -8,7 +8,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     _previousVolume = null;
 
     constructor() {
-        console.log("constructor()");
         super();
         this._elements = {};  // Inizializziamo _elements come oggetto vuoto
         this.doCard();
@@ -17,7 +16,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     setConfig(config) {
-        console.log("setConfig(config)");
         this._config = config;
         this.doCheckConfig();
         this.doUpdateConfig();
@@ -25,37 +23,28 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     set hass(hass) {
-        console.log("hass(hass)");
         this._hass = hass;
         this.doUpdateHass();
     }
 
     getEntityID() {
-        console.log("getEntityID()");
         const inputTextState = this._hass.states[this._config.entity];
-        console.log("inputTextState", inputTextState);
         const entityID = inputTextState ? inputTextState.state : null;
-        console.log("Resolved entityID:", entityID);
         return entityID;
     }
 
     getState() {
-        console.log("getState()");
         const entityID = this.getEntityID();
-        console.log("entityID", entityID);
         const state = entityID ? this._hass.states[entityID] : null;
-        console.log("Full state object:", state);
         return state;
     }
 
     getAttributes() {
-        console.log("getAttributes()");
         const state = this.getState();
         return state ? state.attributes : {};
     }
 
     getName() {
-        console.log("getName()");
         const attributes = this.getAttributes();
         return attributes.friendly_name ? attributes.friendly_name : this.getEntityID();
     }
@@ -77,7 +66,6 @@ class SonosCustomPlayerCard extends HTMLElement {
             entity_id: this.getEntityID(),
             seek_position: this.lastKnownPosition
         }).then(() => {
-            console.log("Position synced with server:", this.lastKnownPosition);
             this._hass.callService("homeassistant", "update_entity", {
                 entity_id: this.getEntityID()
             }).then(() => {
@@ -126,16 +114,13 @@ class SonosCustomPlayerCard extends HTMLElement {
 
     onProgressChanged(event) {
         const progress = parseFloat(event.target.value) / 100;
-        console.log("Raw progress:", progress);
     
         this.updateSeekBarProgress(progress);
     
         const state = this.getState();
-        console.log("Current state:", state);
     
         if (state && state.attributes.media_duration) {
             const mediaDuration = parseFloat(state.attributes.media_duration);
-            console.log("Media duration:", mediaDuration);
     
             if (isNaN(mediaDuration) || !isFinite(mediaDuration)) {
                 console.error("Invalid media duration");
@@ -143,22 +128,18 @@ class SonosCustomPlayerCard extends HTMLElement {
             }
     
             const seekPosition = progress * mediaDuration;
-            console.log("Calculated seek position:", seekPosition);
     
             const roundedSeekPosition = Math.round(seekPosition * 100) / 100;
-            console.log("Rounded seek position:", roundedSeekPosition);
     
             clearTimeout(this.seekTimeout);
             this.seekTimeout = setTimeout(() => {
                 this._elements.progressSlider.classList.add('seeking');
                 this._elements.currentTime.textContent = this.formatTime(roundedSeekPosition);
     
-                console.log("Calling media_seek with position:", roundedSeekPosition);
                 this._hass.callService("media_player", "media_seek", {
                     entity_id: this.getEntityID(),
                     seek_position: roundedSeekPosition
                 }).then(() => {
-                    console.log("Seek successful");
                     this.lastKnownPosition = roundedSeekPosition;
                     this.playbackStartTime = performance.now();
                     this._elements.progressSlider.classList.remove('seeking');
@@ -357,7 +338,6 @@ class SonosCustomPlayerCard extends HTMLElement {
                 entity_id: entityId
             });
     
-            console.log(`Playing queue item at position ${index + 1}`);
             this.toggleQueuePopup(false);
     
             // Aggiorniamo lo stato dopo un breve ritardo
@@ -404,7 +384,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     doCheckConfig() {
-        console.log("doCheckConfig()");
         if (!this._config.entity) {
             throw new Error("Please define an entity!");
         }
@@ -471,13 +450,11 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     doAttach() {
-            console.log("doAttach()");
             this.attachShadow({ mode: "open" });
             this.shadowRoot.append(this._elements.style, this._elements.card);
     }
 
     doQueryElements() {
-        console.log("doQueryElements()");
         if (!this.shadowRoot) {
             console.warn("Shadow root not available, deferring element query");
             return;
@@ -523,7 +500,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     doListen() {
-        console.log("doListen()");
         // Creiamo versioni bound dei nostri metodi di gestione eventi
         this.boundOnVolumeIconClicked = this.onVolumeIconClicked.bind(this);
         this.boundOnVolumeChanged = this.onVolumeChanged.bind(this);
@@ -590,7 +566,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     doUpdateConfig() {
-        console.log("doUpdateConfig()");
         if (this.getHeader()) {
             this._elements.card.setAttribute("header", this.getHeader());
         } else {
@@ -668,16 +643,13 @@ class SonosCustomPlayerCard extends HTMLElement {
         if (this._elements.progressBar) {
             const percent = (progress * 100).toFixed(2);
             this._elements.progressBar.style.width = `${percent}%`;
-            console.log("Updated progress bar width:", percent + "%");
         }
     }
 
     doUpdateHass() {
         const state = this.getState();
-        console.log("Stato completo:", state);
         
         if (!state || state.state === "unavailable" || state.state === "idle") {
-            console.log("Player non disponibile o inattivo");
             if (this._elements.error) {
                 this._elements.error.textContent = `Player ${this.getName()} non disponibile!`;
                 this._elements.error.classList.remove("hidden");
@@ -797,11 +769,9 @@ class SonosCustomPlayerCard extends HTMLElement {
         if (this._elements.card) this._elements.card.classList.remove("loading");
     
         if (state.state === "playing" && !this.isPlaying) {
-            console.log("Starting progress update for playing state");
             this.playbackStartTime = performance.now();
             this.startProgressUpdate();
         } else if (state.state !== "playing" && this.isPlaying) {
-            console.log("Stopping progress update for non-playing state");
             this.stopProgressUpdate();
             this.updateProgress();
         }
@@ -841,7 +811,6 @@ class SonosCustomPlayerCard extends HTMLElement {
 
 
     connectedCallback() {
-        console.log("connectedCallback()");
         if (super.connectedCallback) {
             super.connectedCallback();
         }
@@ -851,7 +820,6 @@ class SonosCustomPlayerCard extends HTMLElement {
 
 
     disconnectedCallback() {
-        console.log("disconnectedCallback()");
         if (super.disconnectedCallback) {
             super.disconnectedCallback();
         }
@@ -861,7 +829,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     removeEventListeners() {
-        console.log("removeEventListeners()");
         if (this._elements.volumeIcon) {
             this._elements.volumeIcon.removeEventListener("click", this.boundOnVolumeIconClicked);
         }
