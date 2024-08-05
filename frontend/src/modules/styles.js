@@ -331,6 +331,19 @@ export const styles = `
     display: none;
 }
 
+
+.progress-control.sonos-hidden,
+.bottom-controls.sonos-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+}
+
+
 /* Responsive Design */
 @media (max-width: 600px) {
     .queue-popup {
@@ -351,5 +364,7 @@ export const styles = `
         flex-grow: 1;
         overflow-y: auto;
     }
+
+
 }
 `;

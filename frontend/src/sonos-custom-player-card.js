@@ -635,7 +635,7 @@ class SonosCustomPlayerCard extends HTMLElement {
                 this._elements.duration.textContent = this.formatTime(state.attributes.media_duration);
             }
         } else {
-            console.warn("Media duration not available or state is null");
+            //console.warn("Media duration not available or state is null");
         }
     }
 
@@ -748,16 +748,58 @@ class SonosCustomPlayerCard extends HTMLElement {
             if (mediaContentId && typeof mediaContentId === 'string') {
                 if (mediaContentId.includes("x-sonos-http")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:plex");
+                    this.showProgressBar();
                 } else if (mediaContentId.includes("x-sonos-spotify")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:spotify");
+                    this.showProgressBar();
+                } else if (mediaContentId.includes("x-rincon-mp3radio")) {
+                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:radio");
+                    this.hideProgressBar();
                 } else {
                     this._elements.mediaSourceIcon.removeAttribute("icon");
+                    this.showProgressBar();
                 }
             } else {
                 this._elements.mediaSourceIcon.removeAttribute("icon");
+                this.showProgressBar();
             }
         }
     }
+
+
+    hideProgressBar() {
+        const progressControl = this.shadowRoot.querySelector('.progress-control');
+        const bottomControls = this.shadowRoot.querySelector('.bottom-controls');
+        
+        if (progressControl) {
+            progressControl.classList.add('sonos-hidden');
+        } else {
+            console.warn("Contenitore progress-control non trovato");
+        }
+        if (bottomControls) {
+            bottomControls.classList.add('sonos-hidden');
+        } else {
+            console.warn("Contenitore bottom-controls non trovato");
+        }
+
+    }
+    
+    showProgressBar() {
+        const progressControl = this.shadowRoot.querySelector('.progress-control');
+        const bottomControls = this.shadowRoot.querySelector('.bottom-controls');
+        if (progressControl) {
+            progressControl.classList.remove('sonos-hidden');
+        } else {
+            console.warn("Contenitore progress-control non trovato");
+        }
+        if (bottomControls) {
+            bottomControls.classList.remove('sonos-hidden');
+        } else {
+            console.warn("Contenitore bottom-controls non trovato");
+        }
+    }    
+
+    
     
     updatePlaybackState(state) {
         if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
