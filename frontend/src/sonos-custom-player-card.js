@@ -752,7 +752,7 @@ class SonosCustomPlayerCard extends HTMLElement {
                 } else if (mediaContentId.includes("x-sonos-spotify")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:spotify");
                     this.showProgressBar();
-                } else if (mediaContentId.includes("x-rincon-mp3radio")) {
+                } else if (mediaContentId.includes("x-rincon-mp3radio") || mediaContentId.includes("hls-radio")) {
                     this._elements.mediaSourceIcon.setAttribute("icon", "mdi:radio");
                     this.hideProgressBar();
                 } else {
