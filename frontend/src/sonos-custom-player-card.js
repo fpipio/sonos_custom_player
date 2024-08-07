@@ -53,7 +53,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         if (!mediaContentId) return 'unknown';
         
         if (typeof mediaContentId === 'string') {
-            if (mediaContentId.includes("x-rincon-mp3radio") || mediaContentId.includes("hls-radio")) {
+            if (mediaContentId.includes("x-rincon-mp3radio") || mediaContentId.includes("hls-radio") || mediaContentId.includes("aac://")) {
                 return 'radio';
             }
             if (mediaContentId.includes("x-sonos-spotify")) {
