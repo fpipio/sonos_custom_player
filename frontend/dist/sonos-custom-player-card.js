@@ -380,7 +380,7 @@ class SonosCustomPlayerCard extends HTMLElement {
 
     constructor() {
         super();
-        this._elements = {};  // Inizializziamo _elements come oggetto vuoto
+        this._elements = {};
         this.doCard();
         this.doStyle();
         this.doAttach();
@@ -390,7 +390,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         this._config = config;
         this.doCheckConfig();
         this.doUpdateConfig();
-        this.doQueryElements();  // Chiamiamo doQueryElements qui
+        this.doQueryElements();
     }
 
     set hass(hass) {
@@ -418,6 +418,94 @@ class SonosCustomPlayerCard extends HTMLElement {
     getName() {
         const attributes = this.getAttributes();
         return attributes.friendly_name ? attributes.friendly_name : this.getEntityID();
+    }
+
+    determineContentType(mediaContentId, attributes) {
+        if (!mediaContentId) return 'unknown';
+        
+        if (typeof mediaContentId === 'string') {
+            if (mediaContentId.includes("x-rincon-mp3radio") || mediaContentId.includes("hls-radio")) {
+                return 'radio';
+            }
+            if (mediaContentId.includes("x-sonos-spotify")) {
+                return 'spotify';
+            }
+            if (mediaContentId.includes("x-sonos-http")) {
+                return 'plex';
+            }
+        }
+        
+        return 'other';
+    }
+
+    updateMediaInfo(attributes) {
+        const contentType = this.determineContentType(attributes.media_content_id, attributes);
+        
+        this.updateMediaIcon(contentType);
+        this.updateMediaImage(contentType, attributes);
+        this.updateMediaText(contentType, attributes);
+    }
+
+    updateMediaIcon(contentType) {
+        if (this._elements.mediaSourceIcon) {
+            switch (contentType) {
+                case 'radio':
+                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:radio");
+                    this.hideProgressBar();
+                    break;
+                case 'spotify':
+                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:spotify");
+                    this.showProgressBar();
+                    break;
+                case 'plex':
+                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:plex");
+                    this.showProgressBar();
+                    break;
+                default:
+                    this._elements.mediaSourceIcon.removeAttribute("icon");
+                    this.showProgressBar();
+            }
+        }
+    }
+
+    updateMediaImage(contentType, attributes) {
+        if (this._elements.albumArt) {
+            if (contentType === 'radio') {
+                const sensorName = `${this.getEntityID().split('.')[1]}_info`;
+                const sensorEntityId = `sensor.${sensorName}`;
+                const sensorState = this._hass.states[sensorEntityId];
+                this._elements.albumArt.src = sensorState?.attributes?.radio_thumbnail || attributes.entity_picture || '';
+            } else {
+                this._elements.albumArt.src = attributes.entity_picture || '';
+            }
+        }
+    }
+
+    updateMediaText(contentType, attributes) {
+        if (this._elements.mediaTitle) {
+            if (contentType === 'radio') {
+                const sensorName = `${this.getEntityID().split('.')[1]}_info`;
+                const sensorEntityId = `sensor.${sensorName}`;
+                const sensorState = this._hass.states[sensorEntityId];
+                this._elements.mediaTitle.textContent = sensorState?.attributes?.radio_name || attributes.media_title || 'Sconosciuto';
+            } else {
+                this._elements.mediaTitle.textContent = attributes.media_title || 'Sconosciuto';
+            }
+        }
+
+        if (contentType === 'radio') {
+            if (this._elements.mediaArtist) this._elements.mediaArtist.style.display = 'none';
+            if (this._elements.mediaAlbum) this._elements.mediaAlbum.style.display = 'none';
+        } else {
+            if (this._elements.mediaArtist) {
+                this._elements.mediaArtist.textContent = attributes.media_artist || 'Sconosciuto';
+                this._elements.mediaArtist.style.display = '';
+            }
+            if (this._elements.mediaAlbum) {
+                this._elements.mediaAlbum.textContent = attributes.media_album_name || 'Sconosciuto';
+                this._elements.mediaAlbum.style.display = '';
+            }
+        }
     }
 
     onClicked() {
@@ -585,8 +673,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         const currentVolume = state.attributes.volume_level;
     
         if (isMuted) {
-            // Se è già in muto, ripristina il volume precedente
-            const volumeToSet = this._previousVolume !== null ? this._previousVolume : 0.5; // Default a 0.5 se non c'è un volume precedente
+            const volumeToSet = this._previousVolume !== null ? this._previousVolume : 0.5;
             this._hass.callService("media_player", "volume_set", {
                 entity_id: this.getEntityID(),
                 volume_level: volumeToSet
@@ -597,7 +684,6 @@ class SonosCustomPlayerCard extends HTMLElement {
             });
             this._previousVolume = null;
         } else {
-            // Se non è in muto, memorizza il volume attuale e metti in muto
             this._previousVolume = currentVolume;
             this._hass.callService("media_player", "volume_mute", {
                 entity_id: this.getEntityID(),
@@ -628,12 +714,12 @@ class SonosCustomPlayerCard extends HTMLElement {
     updateQueuePopup() {
         const entityId = this.getEntityID();
         const playerState = this.getState();
-        const sensorName = `${entityId.split('.')[1]}_queue`;
+        const sensorName = `${entityId.split('.')[1]}_info`;
         const queueState = this._hass.states[`sensor.${sensorName}`];
         const currentTrackNumber = playerState.attributes.queue_position;
         const friendlyName = this.getFriendlyName();
 
-        if (queueState && queueState.attributes && queueState.attributes.items) {
+        if (queueState && queueState.attributes && queueState.attributes.queue_items) {
             this._elements.queueList.innerHTML = '';
             
             const popupTitle = this._elements.queuePopup.querySelector('h3');
@@ -645,7 +731,7 @@ class SonosCustomPlayerCard extends HTMLElement {
                 this._elements.queuePopup.insertBefore(title, this._elements.queueList);
             }
 
-            queueState.attributes.items.forEach((item, index) => {
+            queueState.attributes.queue_items.forEach((item, index) => {
                 const li = document.createElement('li');
                 const isCurrentTrack = index === currentTrackNumber - 1;
                 li.classList.toggle('current-track', isCurrentTrack);
@@ -680,23 +766,18 @@ class SonosCustomPlayerCard extends HTMLElement {
     async playQueueItem(index) {
         const entityId = this.getEntityID();
         try {
-            // Otteniamo lo stato corrente del player
             const state = this.getState();
             const currentQueuePosition = state.attributes.queue_position || 0;
     
-            // Calcoliamo la differenza tra la posizione attuale e quella desiderata
             const positionDifference = index + 1 - currentQueuePosition;
     
-            // Decidiamo quale servizio chiamare in base alla differenza
             if (positionDifference > 0) {
-                // Se la traccia desiderata è dopo quella corrente, usiamo next_track
                 for (let i = 0; i < positionDifference; i++) {
                     await this._hass.callService("media_player", "media_next_track", {
                         entity_id: entityId
                     });
                 }
             } else if (positionDifference < 0) {
-                // Se la traccia desiderata è prima di quella corrente, usiamo previous_track
                 for (let i = 0; i > positionDifference; i--) {
                     await this._hass.callService("media_player", "media_previous_track", {
                         entity_id: entityId
@@ -704,14 +785,12 @@ class SonosCustomPlayerCard extends HTMLElement {
                 }
             }
     
-            // Assicuriamoci che la riproduzione inizi
             await this._hass.callService("media_player", "media_play", {
                 entity_id: entityId
             });
     
             this.toggleQueuePopup(false);
     
-            // Aggiorniamo lo stato dopo un breve ritardo
             setTimeout(() => {
                 this._hass.callService("homeassistant", "update_entity", {
                     entity_id: entityId
@@ -728,8 +807,7 @@ class SonosCustomPlayerCard extends HTMLElement {
         }
     }
 
-
-
+    
     forceUpdate() {
         this._hass.callService("homeassistant", "update_entity", {
             entity_id: this.getEntityID()
@@ -821,8 +899,8 @@ class SonosCustomPlayerCard extends HTMLElement {
     }
 
     doAttach() {
-            this.attachShadow({ mode: "open" });
-            this.shadowRoot.append(this._elements.style, this._elements.card);
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.append(this._elements.style, this._elements.card);
     }
 
     doQueryElements() {
@@ -989,7 +1067,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     
             const progress = this.lastKnownPosition / state.attributes.media_duration;
             
-            // Aggiungiamo un controllo per this._elements.progressSlider
             if (this._elements.progressSlider) {
                 this._elements.progressSlider.value = progress * 100;
             } else {
@@ -998,7 +1075,6 @@ class SonosCustomPlayerCard extends HTMLElement {
     
             this.updateSeekBarProgress(progress);
     
-            // Aggiungiamo controlli anche per currentTime e duration
             if (this._elements.currentTime) {
                 this._elements.currentTime.textContent = this.formatTime(this.lastKnownPosition);
             }
@@ -1070,16 +1146,6 @@ class SonosCustomPlayerCard extends HTMLElement {
         }
     }
     
-    updateMediaInfo(attributes) {
-        if (this._elements.albumArt) this._elements.albumArt.src = attributes.entity_picture || '';
-        if (this._elements.mediaTitle) this._elements.mediaTitle.textContent = attributes.media_title || 'Sconosciuto';
-        if (this._elements.mediaArtist) this._elements.mediaArtist.textContent = attributes.media_artist || 'Sconosciuto';
-        if (this._elements.mediaAlbum) this._elements.mediaAlbum.textContent = attributes.media_album_name || 'Sconosciuto';
-        
-        // Aggiorna l'icona della sorgente media
-        this.updateMediaSourceIcon(attributes.media_content_id);
-    }
-    
     updateControls(state) {
         const isMuted = state.attributes.is_volume_muted;
         if (this._elements.volumeIcon) {
@@ -1101,7 +1167,7 @@ class SonosCustomPlayerCard extends HTMLElement {
             this._elements.shuffle.setAttribute("icon", shuffleIcon);
         }
     
-        if (this._elements.repeat) {
+       if (this._elements.repeat) {
             const repeatIconMap = {
                 'off': 'mdi:repeat-off',
                 'all': 'mdi:repeat',
@@ -1111,30 +1177,6 @@ class SonosCustomPlayerCard extends HTMLElement {
             this._elements.repeat.setAttribute("icon", repeatIcon);
         }
     }
-    
-    updateMediaSourceIcon(mediaContentId) {
-        if (this._elements.mediaSourceIcon) {
-            if (mediaContentId && typeof mediaContentId === 'string') {
-                if (mediaContentId.includes("x-sonos-http")) {
-                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:plex");
-                    this.showProgressBar();
-                } else if (mediaContentId.includes("x-sonos-spotify")) {
-                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:spotify");
-                    this.showProgressBar();
-                } else if (mediaContentId.includes("x-rincon-mp3radio") || mediaContentId.includes("hls-radio")) {
-                    this._elements.mediaSourceIcon.setAttribute("icon", "mdi:radio");
-                    this.hideProgressBar();
-                } else {
-                    this._elements.mediaSourceIcon.removeAttribute("icon");
-                    this.showProgressBar();
-                }
-            } else {
-                this._elements.mediaSourceIcon.removeAttribute("icon");
-                this.showProgressBar();
-            }
-        }
-    }
-
 
     hideProgressBar() {
         const progressControl = this.shadowRoot.querySelector('.progress-control');
@@ -1150,7 +1192,6 @@ class SonosCustomPlayerCard extends HTMLElement {
         } else {
             console.warn("Contenitore bottom-controls non trovato");
         }
-
     }
     
     showProgressBar() {
@@ -1167,8 +1208,6 @@ class SonosCustomPlayerCard extends HTMLElement {
             console.warn("Contenitore bottom-controls non trovato");
         }
     }    
-
-    
     
     updatePlaybackState(state) {
         if (state.attributes.media_title !== this._lastKnownTitle || state.state !== "playing") {
@@ -1213,13 +1252,11 @@ class SonosCustomPlayerCard extends HTMLElement {
         });
     }
 
-
     doToggle() {
         this._hass.callService("input_boolean", "toggle", {
             entity_id: this.getEntityID(),
         });
     }
-
 
     connectedCallback() {
         if (super.connectedCallback) {
@@ -1229,13 +1266,11 @@ class SonosCustomPlayerCard extends HTMLElement {
         this.doListen();
     }
 
-
     disconnectedCallback() {
         if (super.disconnectedCallback) {
             super.disconnectedCallback();
         }
         this.stopProgressUpdate();
-        // Rimuovi eventuali listener di eventi qui
         this.removeEventListeners();
     }
 
@@ -1272,8 +1307,6 @@ class SonosCustomPlayerCard extends HTMLElement {
         }
         document.removeEventListener("click", this.boundHandleOutsideClick);
     }
-
-
 
     static getConfigElement() {
         return document.createElement("toggle-with-graphical-configuration-editor");
